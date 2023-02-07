@@ -1,0 +1,23 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Building an SIR Model Using R",
+    "section": "",
+    "text": "The first thing we’ll do in our R code is import the libraries that are important for working with differential equations (deSolve), manipulating data (tidyr), and plotting (ggplot2).\n\nlibrary(deSolve)\nlibrary(tidyr)\nlibrary(ggplot2)\n\nNow, we have to create variables that hold the various rate parameters (e.g., \\(\\beta\\) - infection rate) the model uses, as well as the state of the population when we start our simulation. Note that R assigns variables with the arrow operator (<- or ->), and puts items together in a group using the combine function (c).\n\npopSize <- 10000\nparams  <- c(beta=0.3/popSize, gamma=0.1)\nstate   <- c(S=10000-1, I=1, R=0)"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this site\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "index.html#extending-the-sir-model",
+    "href": "index.html#extending-the-sir-model",
+    "title": "Building an SIR Model Using R",
+    "section": "Extending the SIR Model",
+    "text": "Extending the SIR Model\nWe’ve seen many different versions of these contagion models now. Let’s see how we might go about building a slightly more complex version!\nI copied and pasted all the code we walked through above into one block now. But I’m also going to start modifying the model to include a transition from the Recovered compartment back into the Susceptible one. So, we’ll be looking at an SIRS model now!\n\npopSize <- 10000\nparams  <- c(beta=0.3/popSize, gamma=0.1, zeta=0.03)\nstate   <- c(S=10000-1, I=1, R=0)\n\nSIRModel <- function(t, state, params) {\n  with(as.list(c(params, state)), {\n    dS = -beta*S*I + zeta*R\n    dI = beta*S*I-gamma*I\n    dR = gamma * I - zeta*R\n    eqns = c(dS, dI, dR)\n    return(list(eqns))\n  })\n}\n\ntimes <- seq(0, 200, 1)\n\nmodel_output <- ode(y = state, times = times, func = SIRModel, parms = params)\noutput_gathered <- gather(as.data.frame(model_output), Compartment, Count, -time)\n\nqplot(time, Count, data=output_gathered, color=Compartment)"
+  }
+]

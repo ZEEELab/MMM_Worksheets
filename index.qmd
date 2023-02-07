@@ -1,0 +1,113 @@
+---
+title: "Building an SIR Model Using R"
+---
+
+### Getting Set Up
+
+The first thing we'll do in our R code is import the libraries that are important for working with differential equations (**deSolve**), manipulating data (**tidyr**), and plotting (**ggplot2**).
+
+```{r}
+library(deSolve)
+library(tidyr)
+library(ggplot2)
+```
+
+Now, we have to create variables that hold the various rate parameters (e.g., $\beta$ - infection rate) the model uses, as well as the state of the population when we start our simulation. Note that R assigns variables with the arrow operator (\<- or -\>), and puts items together in a group using the combine function (c).
+
+```{r}
+popSize <- 10000
+params  <- c(beta=0.3/popSize, gamma=0.1)
+state   <- c(S=10000-1, I=1, R=0)
+```
+
+### Defining Our Differential Equations
+
+The deSolve library expects a function that takes in a parameter for the current time (t), the current state of the model (**state**), and the parameters of the model (**params**).
+
+We'll call this function **SIRModel**, and use a nice trick to bring all our named variables from the **params** and **state** collections into the scope of our function by calling **with** and creating a list out of those collections.
+
+This is a bit of R trickery, and looking too much into the differences between collections and lists might drive you mad. Nevertheless, this is a useful trick to have in your toolbox!
+
+By unpacking the current state, we can write our system of differential equations in nearly the same way as we have done on the chalkboard! Then, we just return the set of their new values to the deSolve ODE Solver.
+
+```{r}
+SIRModel <- function(t, state, params) {
+  with(as.list(c(params, state)), {
+    dS = -beta*S*I
+    dI = beta*S*I-gamma*I
+    dR = gamma * I
+    eqns = c(dS, dI, dR)
+    return(list(eqns))
+  })
+}
+```
+
+### Running the Solver
+
+The function **ode** is part of the deSolve library that we're using for numerically solving systems of differential equations. It expects to get the initial conditions of our system (**y**), a vector of timepoints that should be solved for (**times**), the function we have defined that describes the differential equations (**func**), and the parameters used within that function (**params**).
+
+It will output a matrix made up of each variable and each timepoint, but we can use a helper function to turn this matrix into a dataframe and look at it.
+
+```{r}
+times <- seq(0, 200, 1)
+
+model_output <- ode(y = state, times = times, func = SIRModel, parms = params)
+as.data.frame(model_output)
+```
+
+### Plotting the Output
+
+We can even quickly plot each variable using the built in **plot** function.
+
+```{r}
+plot(model_output)
+```
+
+### Prettier Plotting
+
+#### Step 1: Massage The Data
+
+But, this isn't the most attractive plot right out the gate. Fortunately, R has some nice tools to make pretty plots (and more expressive plotting code). We'll have to first massage the data into a "tidy" format. The tidyr package provides a **gather** function that helps us do this easily! Let's see what this command does.
+
+```{r}
+output_gathered <- gather(as.data.frame(model_output), Compartment, Count, -time)
+
+output_gathered
+```
+
+It took our data with seperate columns for the *S*, *I*, and *R* compartments, and created a new dataframe with the new Compartment and Count columns. Instead of having a *wide* dataframe, we have a *long (*andtidy*)* one.
+
+#### Step 2: Plot it!
+
+```{r}
+qplot(time, Count, data=output_gathered, color=Compartment)
+```
+
+## Extending the SIR Model
+
+We've seen many different versions of these contagion models now. Let's see how we might go about building a slightly more complex version!
+
+I copied and pasted all the code we walked through above into one block now. But I'm also going to start modifying the model to include a transition from the **Recovered** compartment back into the **Susceptible** one. So, we'll be looking at an **SIRS** model now!
+
+```{r}
+popSize <- 10000
+params  <- c(beta=0.3/popSize, gamma=0.1, zeta=0.03)
+state   <- c(S=10000-1, I=1, R=0)
+
+SIRModel <- function(t, state, params) {
+  with(as.list(c(params, state)), {
+    dS = -beta*S*I + zeta*R
+    dI = beta*S*I-gamma*I
+    dR = gamma * I - zeta*R
+    eqns = c(dS, dI, dR)
+    return(list(eqns))
+  })
+}
+
+times <- seq(0, 200, 1)
+
+model_output <- ode(y = state, times = times, func = SIRModel, parms = params)
+output_gathered <- gather(as.data.frame(model_output), Compartment, Count, -time)
+
+qplot(time, Count, data=output_gathered, color=Compartment)
+```

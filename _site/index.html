@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.269">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>SIR Models in R - Building an SIR Model Using R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+<link href="site_libs/pagedtable-1.1/css/pagedtable.css" rel="stylesheet">
+<script src="site_libs/pagedtable-1.1/js/pagedtable.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">SIR Models in R</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link active" href="./index.html" aria-current="page">
+ <span class="menu-text">Home</span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#getting-set-up" id="toc-getting-set-up" class="nav-link active" data-scroll-target="#getting-set-up">Getting Set Up</a></li>
+  <li><a href="#defining-our-differential-equations" id="toc-defining-our-differential-equations" class="nav-link" data-scroll-target="#defining-our-differential-equations">Defining Our Differential Equations</a></li>
+  <li><a href="#running-the-solver" id="toc-running-the-solver" class="nav-link" data-scroll-target="#running-the-solver">Running the Solver</a></li>
+  <li><a href="#plotting-the-output" id="toc-plotting-the-output" class="nav-link" data-scroll-target="#plotting-the-output">Plotting the Output</a></li>
+  <li><a href="#prettier-plotting" id="toc-prettier-plotting" class="nav-link" data-scroll-target="#prettier-plotting">Prettier Plotting</a></li>
+  <li><a href="#extending-the-sir-model" id="toc-extending-the-sir-model" class="nav-link" data-scroll-target="#extending-the-sir-model">Extending the SIR Model</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Building an SIR Model Using R</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="getting-set-up" class="level3">
+<h3 class="anchored" data-anchor-id="getting-set-up">Getting Set Up</h3>
+<p>The first thing we’ll do in our R code is import the libraries that are important for working with differential equations (<strong>deSolve</strong>), manipulating data (<strong>tidyr</strong>), and plotting (<strong>ggplot2</strong>).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(deSolve)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we have to create variables that hold the various rate parameters (e.g., <span class="math inline">\(\beta\)</span> - infection rate) the model uses, as well as the state of the population when we start our simulation. Note that R assigns variables with the arrow operator (&lt;- or -&gt;), and puts items together in a group using the combine function (c).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>popSize <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>params  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">beta=</span><span class="fl">0.3</span><span class="sc">/</span>popSize, <span class="at">gamma=</span><span class="fl">0.1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>state   <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">S=</span><span class="dv">10000-1</span>, <span class="at">I=</span><span class="dv">1</span>, <span class="at">R=</span><span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="defining-our-differential-equations" class="level3">
+<h3 class="anchored" data-anchor-id="defining-our-differential-equations">Defining Our Differential Equations</h3>
+<p>The deSolve library expects a function that takes in a parameter for the current time (t), the current state of the model (<strong>state</strong>), and the parameters of the model (<strong>params</strong>).</p>
+<p>We’ll call this function <strong>SIRModel</strong>, and use a nice trick to bring all our named variables from the <strong>params</strong> and <strong>state</strong> collections into the scope of our function by calling <strong>with</strong> and creating a list out of those collections.</p>
+<p>This is a bit of R trickery, and looking too much into the differences between collections and lists might drive you mad. Nevertheless, this is a useful trick to have in your toolbox!</p>
+<p>By unpacking the current state, we can write our system of differential equations in nearly the same way as we have done on the chalkboard! Then, we just return the set of their new values to the deSolve ODE Solver.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>SIRModel <span class="ot">&lt;-</span> <span class="cf">function</span>(t, state, params) {</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">as.list</span>(<span class="fu">c</span>(params, state)), {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    dS <span class="ot">=</span> <span class="sc">-</span>beta<span class="sc">*</span>S<span class="sc">*</span>I</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    dI <span class="ot">=</span> beta<span class="sc">*</span>S<span class="sc">*</span>I<span class="sc">-</span>gamma<span class="sc">*</span>I</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    dR <span class="ot">=</span> gamma <span class="sc">*</span> I</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    eqns <span class="ot">=</span> <span class="fu">c</span>(dS, dI, dR)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(eqns))</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="running-the-solver" class="level3">
+<h3 class="anchored" data-anchor-id="running-the-solver">Running the Solver</h3>
+<p>The function <strong>ode</strong> is part of the deSolve library that we’re using for numerically solving systems of differential equations. It expects to get the initial conditions of our system (<strong>y</strong>), a vector of timepoints that should be solved for (<strong>times</strong>), the function we have defined that describes the differential equations (<strong>func</strong>), and the parameters used within that function (<strong>params</strong>).</p>
+<p>It will output a matrix made up of each variable and each timepoint, but we can use a helper function to turn this matrix into a dataframe and look at it.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">200</span>, <span class="dv">1</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>model_output <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> state, <span class="at">times =</span> times, <span class="at">func =</span> SIRModel, <span class="at">parms =</span> params)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">as.data.frame</span>(model_output)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["time"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["S"],"name":[2],"type":["dbl"],"align":["right"]},{"label":["I"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["R"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"9999.0000","3":"1.000000e+00","4":"0.0000000"},{"1":"1","2":"9998.6679","3":"1.221361e+00","4":"0.1106997"},{"1":"2","2":"9998.2624","3":"1.491706e+00","4":"0.2459037"},{"1":"3","2":"9997.7671","3":"1.821866e+00","4":"0.4110326"},{"1":"4","2":"9997.1622","3":"2.225064e+00","4":"0.6127086"},{"1":"5","2":"9996.4235","3":"2.717441e+00","4":"0.8590153"},{"1":"6","2":"9995.5215","3":"3.318689e+00","4":"1.1598213"},{"1":"7","2":"9994.4200","3":"4.052848e+00","4":"1.5271778"},{"1":"8","2":"9993.0750","3":"4.949236e+00","4":"1.9757923"},{"1":"9","2":"9991.4328","3":"6.043612e+00","4":"2.5236171"},{"1":"10","2":"9989.4279","3":"7.379574e+00","4":"3.1925585"},{"1":"11","2":"9986.9804","3":"9.010253e+00","4":"4.0093429"},{"1":"12","2":"9983.9931","3":"1.100037e+01","4":"5.0065746"},{"1":"13","2":"9980.3473","3":"1.342873e+01","4":"6.2240077"},{"1":"14","2":"9975.8987","3":"1.639116e+01","4":"7.7101013"},{"1":"15","2":"9970.4719","3":"2.000417e+01","4":"9.5238995"},{"1":"16","2":"9963.8535","3":"2.440917e+01","4":"11.7373030"},{"1":"17","2":"9955.7846","3":"2.977763e+01","4":"14.4378105"},{"1":"18","2":"9945.9511","3":"3.631709e+01","4":"17.7318165"},{"1":"19","2":"9933.9732","3":"4.427823e+01","4":"21.7485629"},{"1":"20","2":"9919.3920","3":"5.396311e+01","4":"26.6448559"},{"1":"21","2":"9901.6548","3":"6.573458e+01","4":"32.6106624"},{"1":"22","2":"9880.0975","3":"8.002682e+01","4":"39.8757087"},{"1":"23","2":"9853.9258","3":"9.735701e+01","4":"48.7171888"},{"1":"24","2":"9822.1937","3":"1.183376e+02","4":"59.4686745"},{"1":"25","2":"9783.7810","3":"1.436887e+02","4":"72.5302651"},{"1":"26","2":"9737.3705","3":"1.742495e+02","4":"88.3799357"},{"1":"27","2":"9681.4272","3":"2.109869e+02","4":"107.5859080"},{"1":"28","2":"9614.1810","3":"2.549993e+02","4":"130.8196676"},{"1":"29","2":"9533.6192","3":"3.075118e+02","4":"158.8689640"},{"1":"30","2":"9437.4912","3":"3.698590e+02","4":"192.6497430"},{"1":"31","2":"9323.3357","3":"4.434488e+02","4":"233.2154631"},{"1":"32","2":"9188.5360","3":"5.297024e+02","4":"281.7616592"},{"1":"33","2":"9030.4140","3":"6.299630e+02","4":"339.6229904"},{"1":"34","2":"8846.3705","3":"7.453700e+02","4":"408.2594554"},{"1":"35","2":"8634.0754","3":"8.766964e+02","4":"489.2281653"},{"1":"36","2":"8391.7062","3":"1.024157e+03","4":"584.1372979"},{"1":"37","2":"8118.2208","3":"1.187199e+03","4":"694.5799157"},{"1":"38","2":"7813.6381","3":"1.364314e+03","4":"822.0474837"},{"1":"39","2":"7479.2835","3":"1.552890e+03","4":"967.8262313"},{"1":"40","2":"7117.9497","3":"1.749167e+03","4":"1132.8836667"},{"1":"41","2":"6733.9223","3":"1.948321e+03","4":"1317.7567835"},{"1":"42","2":"6332.8344","3":"2.144709e+03","4":"1522.4565708"},{"1":"43","2":"5921.3461","3":"2.332250e+03","4":"1746.4040267"},{"1":"44","2":"5506.6816","3":"2.504908e+03","4":"1988.4100812"},{"1":"45","2":"5096.0907","3":"2.657204e+03","4":"2246.7057778"},{"1":"46","2":"4696.3205","3":"2.784658e+03","4":"2519.0210104"},{"1":"47","2":"4313.1784","3":"2.884119e+03","4":"2802.7021887"},{"1":"48","2":"3951.2408","3":"2.953906e+03","4":"3094.8535253"},{"1":"49","2":"3613.7291","3":"2.993786e+03","4":"3392.4845031"},{"1":"50","2":"3302.5374","3":"3.004815e+03","4":"3692.6475547"},{"1":"51","2":"3018.3759","3":"2.989070e+03","4":"3992.5540789"},{"1":"52","2":"2760.9816","3":"2.949356e+03","4":"4289.6621459"},{"1":"53","2":"2529.3554","3":"2.888910e+03","4":"4581.7342233"},{"1":"54","2":"2321.9899","3":"2.811143e+03","4":"4866.8670933"},{"1":"55","2":"2137.0686","3":"2.719433e+03","4":"5143.4984934"},{"1":"56","2":"1972.6264","3":"2.616978e+03","4":"5410.3960046"},{"1":"57","2":"1826.6700","3":"2.506696e+03","4":"5666.6336703"},{"1":"58","2":"1697.2621","3":"2.391177e+03","4":"5911.5611656"},{"1":"59","2":"1582.5762","3":"2.272654e+03","4":"6144.7693827"},{"1":"60","2":"1480.9271","3":"2.153018e+03","4":"6366.0553003"},{"1":"61","2":"1390.7853","3":"2.033827e+03","4":"6575.3881107"},{"1":"62","2":"1310.7791","3":"1.916343e+03","4":"6772.8778365"},{"1":"63","2":"1239.6895","3":"1.801563e+03","4":"6958.7471105"},{"1":"64","2":"1176.4403","3":"1.690253e+03","4":"7133.3063844"},{"1":"65","2":"1120.0858","3":"1.582982e+03","4":"7296.9325634"},{"1":"66","2":"1069.7980","3":"1.480151e+03","4":"7450.0508875"},{"1":"67","2":"1024.8530","3":"1.382027e+03","4":"7593.1197876"},{"1":"68","2":"984.6191","3":"1.288763e+03","4":"7726.6183958"},{"1":"69","2":"948.5452","3":"1.200418e+03","4":"7851.0363790"},{"1":"70","2":"916.1505","3":"1.116984e+03","4":"7966.8657763"},{"1":"71","2":"887.0151","3":"1.038390e+03","4":"8074.5945406"},{"1":"72","2":"860.7722","3":"9.645263e+02","4":"8174.7015178"},{"1":"73","2":"837.1009","3":"8.952465e+02","4":"8267.6526231"},{"1":"74","2":"815.7198","3":"8.303821e+02","4":"8353.8980103"},{"1":"75","2":"796.3823","3":"7.697476e+02","4":"8433.8700538"},{"1":"76","2":"778.8713","3":"7.131467e+02","4":"8507.9819943"},{"1":"77","2":"762.9956","3":"6.603773e+02","4":"8576.6271173"},{"1":"78","2":"748.5866","3":"6.112351e+02","4":"8640.1783603"},{"1":"79","2":"735.4951","3":"5.655166e+02","4":"8698.9882545"},{"1":"80","2":"723.5891","3":"5.230218e+02","4":"8753.3891358"},{"1":"81","2":"712.7511","3":"4.835553e+02","4":"8803.6935539"},{"1":"82","2":"702.8770","3":"4.469282e+02","4":"8850.1948359"},{"1":"83","2":"693.8738","3":"4.129585e+02","4":"8893.1677593"},{"1":"84","2":"685.6584","3":"3.814723e+02","4":"8932.8693046"},{"1":"85","2":"678.1568","3":"3.523037e+02","4":"8969.5394596"},{"1":"86","2":"671.3024","3":"3.252955e+02","4":"9003.4020527"},{"1":"87","2":"665.0357","3":"3.002987e+02","4":"9034.6656003"},{"1":"88","2":"659.3029","3":"2.771729e+02","4":"9063.5241532"},{"1":"89","2":"654.0560","3":"2.557859e+02","4":"9090.1581323"},{"1":"90","2":"649.2513","3":"2.360136e+02","4":"9114.7351461"},{"1":"91","2":"644.8496","3":"2.177396e+02","4":"9137.4107828"},{"1":"92","2":"640.8155","3":"2.008551e+02","4":"9158.3293748"},{"1":"93","2":"637.1168","3":"1.852585e+02","4":"9177.6247302"},{"1":"94","2":"633.7244","3":"1.708548e+02","4":"9195.4208314"},{"1":"95","2":"630.6119","3":"1.575556e+02","4":"9211.8324985"},{"1":"96","2":"627.7554","3":"1.452786e+02","4":"9226.9660176"},{"1":"97","2":"625.1330","3":"1.339472e+02","4":"9240.9197342"},{"1":"98","2":"622.7250","3":"1.234904e+02","4":"9253.7846117"},{"1":"99","2":"620.5132","3":"1.138420e+02","4":"9265.6447570"},{"1":"100","2":"618.4813","3":"1.049408e+02","4":"9276.5779120"},{"1":"101","2":"616.6142","3":"9.672985e+01","4":"9286.6559153"},{"1":"102","2":"614.8983","3":"8.915660e+01","4":"9295.9451330"},{"1":"103","2":"613.3209","3":"8.217222e+01","4":"9304.5068603"},{"1":"104","2":"611.8707","3":"7.573155e+01","4":"9312.3976974"},{"1":"105","2":"610.5373","3":"6.979279e+01","4":"9319.6698978"},{"1":"106","2":"609.3110","3":"6.431727e+01","4":"9326.3716939"},{"1":"107","2":"608.1832","3":"5.926924e+01","4":"9332.5475986"},{"1":"108","2":"607.1457","3":"5.461563e+01","4":"9338.2386860"},{"1":"109","2":"606.1912","3":"5.032590e+01","4":"9343.4828514"},{"1":"110","2":"605.3131","3":"4.637184e+01","4":"9348.3150532"},{"1":"111","2":"604.5051","3":"4.272736e+01","4":"9352.7675364"},{"1":"112","2":"603.7616","3":"3.936839e+01","4":"9356.8700401"},{"1":"113","2":"603.0773","3":"3.627271e+01","4":"9360.6499893"},{"1":"114","2":"602.4475","3":"3.341980e+01","4":"9364.1326730"},{"1":"115","2":"601.8679","3":"3.079071e+01","4":"9367.3414082"},{"1":"116","2":"601.3343","3":"2.836798e+01","4":"9370.2976923"},{"1":"117","2":"600.8432","3":"2.613547e+01","4":"9373.0213435"},{"1":"118","2":"600.3910","3":"2.407832e+01","4":"9375.5306310"},{"1":"119","2":"599.9748","3":"2.218280e+01","4":"9377.8423947"},{"1":"120","2":"599.5916","3":"2.043626e+01","4":"9379.9721565"},{"1":"121","2":"599.2388","3":"1.882702e+01","4":"9381.9342226"},{"1":"122","2":"598.9139","3":"1.734433e+01","4":"9383.7417781"},{"1":"123","2":"598.6148","3":"1.597825e+01","4":"9385.4069742"},{"1":"124","2":"598.3394","3":"1.471964e+01","4":"9386.9410091"},{"1":"125","2":"598.0857","3":"1.356006e+01","4":"9388.3542022"},{"1":"126","2":"597.8522","3":"1.249174e+01","4":"9389.6560627"},{"1":"127","2":"597.6371","3":"1.150751e+01","4":"9390.8553532"},{"1":"128","2":"597.4391","3":"1.060077e+01","4":"9391.9601476"},{"1":"129","2":"597.2567","3":"9.765411e+00","4":"9392.9778856"},{"1":"130","2":"597.0887","3":"8.995836e+00","4":"9393.9154220"},{"1":"131","2":"596.9341","3":"8.286868e+00","4":"9394.7790726"},{"1":"132","2":"596.7916","3":"7.633741e+00","4":"9395.5746566"},{"1":"133","2":"596.6604","3":"7.032060e+00","4":"9396.3075353"},{"1":"134","2":"596.5396","3":"6.477779e+00","4":"9396.9826483"},{"1":"135","2":"596.4283","3":"5.967167e+00","4":"9397.6045464"},{"1":"136","2":"596.3258","3":"5.496786e+00","4":"9398.1774223"},{"1":"137","2":"596.2314","3":"5.063469e+00","4":"9398.7051387"},{"1":"138","2":"596.1444","3":"4.664298e+00","4":"9399.1912541"},{"1":"139","2":"596.0644","3":"4.296585e+00","4":"9399.6390468"},{"1":"140","2":"595.9906","3":"3.957852e+00","4":"9400.0515369"},{"1":"141","2":"595.9227","3":"3.645815e+00","4":"9400.4315068"},{"1":"142","2":"595.8601","3":"3.358374e+00","4":"9400.7815196"},{"1":"143","2":"595.8025","3":"3.093588e+00","4":"9401.1039366"},{"1":"144","2":"595.7494","3":"2.849675e+00","4":"9401.4009329"},{"1":"145","2":"595.7005","3":"2.624989e+00","4":"9401.6745123"},{"1":"146","2":"595.6555","3":"2.418015e+00","4":"9401.9265210"},{"1":"147","2":"595.6140","3":"2.227358e+00","4":"9402.1586592"},{"1":"148","2":"595.5758","3":"2.051731e+00","4":"9402.3724934"},{"1":"149","2":"595.5406","3":"1.889951e+00","4":"9402.5694668"},{"1":"150","2":"595.5082","3":"1.740925e+00","4":"9402.7509086"},{"1":"151","2":"595.4783","3":"1.603648e+00","4":"9402.9180433"},{"1":"152","2":"595.4508","3":"1.477195e+00","4":"9403.0719990"},{"1":"153","2":"595.4255","3":"1.360712e+00","4":"9403.2138146"},{"1":"154","2":"595.4021","3":"1.253414e+00","4":"9403.3444475"},{"1":"155","2":"595.3806","3":"1.154575e+00","4":"9403.4647793"},{"1":"156","2":"595.3608","3":"1.063530e+00","4":"9403.5756222"},{"1":"157","2":"595.3426","3":"9.796637e-01","4":"9403.6777245"},{"1":"158","2":"595.3258","3":"9.024104e-01","4":"9403.7717753"},{"1":"159","2":"595.3103","3":"8.312486e-01","4":"9403.8584096"},{"1":"160","2":"595.2961","3":"7.656981e-01","4":"9403.9382120"},{"1":"161","2":"595.2830","3":"7.053165e-01","4":"9404.0117214"},{"1":"162","2":"595.2709","3":"6.496963e-01","4":"9404.0794340"},{"1":"163","2":"595.2597","3":"5.984619e-01","4":"9404.1418069"},{"1":"164","2":"595.2495","3":"5.512677e-01","4":"9404.1992610"},{"1":"165","2":"595.2400","3":"5.077950e-01","4":"9404.2521844"},{"1":"166","2":"595.2313","3":"4.677505e-01","4":"9404.3009343"},{"1":"167","2":"595.2233","3":"4.308637e-01","4":"9404.3458398"},{"1":"168","2":"595.2159","3":"3.968857e-01","4":"9404.3872040"},{"1":"169","2":"595.2091","3":"3.655872e-01","4":"9404.4253062"},{"1":"170","2":"595.2028","3":"3.367568e-01","4":"9404.4604037"},{"1":"171","2":"595.1971","3":"3.101999e-01","4":"9404.4927333"},{"1":"172","2":"595.1917","3":"2.857373e-01","4":"9404.5225134"},{"1":"173","2":"595.1869","3":"2.632037e-01","4":"9404.5499451"},{"1":"174","2":"595.1823","3":"2.424472e-01","4":"9404.5752134"},{"1":"175","2":"595.1782","3":"2.233275e-01","4":"9404.5984891"},{"1":"176","2":"595.1744","3":"2.057156e-01","4":"9404.6199292"},{"1":"177","2":"595.1708","3":"1.894926e-01","4":"9404.6396785"},{"1":"178","2":"595.1676","3":"1.745489e-01","4":"9404.6578703"},{"1":"179","2":"595.1646","3":"1.607837e-01","4":"9404.6746275"},{"1":"180","2":"595.1618","3":"1.481040e-01","4":"9404.6900632"},{"1":"181","2":"595.1593","3":"1.364243e-01","4":"9404.7042816"},{"1":"182","2":"595.1570","3":"1.256656e-01","4":"9404.7173788"},{"1":"183","2":"595.1548","3":"1.157554e-01","4":"9404.7294430"},{"1":"184","2":"595.1528","3":"1.066267e-01","4":"9404.7405559"},{"1":"185","2":"595.1510","3":"9.821787e-02","4":"9404.7507924"},{"1":"186","2":"595.1493","3":"9.047221e-02","4":"9404.7602216"},{"1":"187","2":"595.1478","3":"8.333738e-02","4":"9404.7689072"},{"1":"188","2":"595.1463","3":"7.676521e-02","4":"9404.7769078"},{"1":"189","2":"595.1450","3":"7.071134e-02","4":"9404.7842775"},{"1":"190","2":"595.1438","3":"6.513488e-02","4":"9404.7910660"},{"1":"191","2":"595.1427","3":"5.999820e-02","4":"9404.7973191"},{"1":"192","2":"595.1417","3":"5.526660e-02","4":"9404.8030791"},{"1":"193","2":"595.1407","3":"5.090815e-02","4":"9404.8083849"},{"1":"194","2":"595.1398","3":"4.689342e-02","4":"9404.8132722"},{"1":"195","2":"595.1390","3":"4.319529e-02","4":"9404.8177741"},{"1":"196","2":"595.1383","3":"3.978881e-02","4":"9404.8219210"},{"1":"197","2":"595.1376","3":"3.665096e-02","4":"9404.8257408"},{"1":"198","2":"595.1370","3":"3.376058e-02","4":"9404.8292594"},{"1":"199","2":"595.1364","3":"3.109814e-02","4":"9404.8325005"},{"1":"200","2":"595.1359","3":"2.864566e-02","4":"9404.8354860"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+</section>
+<section id="plotting-the-output" class="level3">
+<h3 class="anchored" data-anchor-id="plotting-the-output">Plotting the Output</h3>
+<p>We can even quickly plot each variable using the built in <strong>plot</strong> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(model_output)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+<section id="prettier-plotting" class="level3">
+<h3 class="anchored" data-anchor-id="prettier-plotting">Prettier Plotting</h3>
+<section id="step-1-massage-the-data" class="level4">
+<h4 class="anchored" data-anchor-id="step-1-massage-the-data">Step 1: Massage The Data</h4>
+<p>But, this isn’t the most attractive plot right out the gate. Fortunately, R has some nice tools to make pretty plots (and more expressive plotting code). We’ll have to first massage the data into a “tidy” format. The tidyr package provides a <strong>gather</strong> function that helps us do this easily! Let’s see what this command does.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>output_gathered <span class="ot">&lt;-</span> <span class="fu">gather</span>(<span class="fu">as.data.frame</span>(model_output), Compartment, Count, <span class="sc">-</span>time)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>output_gathered</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+
+<div data-pagedtable="false">
+  <script data-pagedtable-source="" type="application/json">
+{"columns":[{"label":["time"],"name":[1],"type":["dbl"],"align":["right"]},{"label":["Compartment"],"name":[2],"type":["chr"],"align":["left"]},{"label":["Count"],"name":[3],"type":["dbl"],"align":["right"]}],"data":[{"1":"0","2":"S","3":"9.999000e+03"},{"1":"1","2":"S","3":"9.998668e+03"},{"1":"2","2":"S","3":"9.998262e+03"},{"1":"3","2":"S","3":"9.997767e+03"},{"1":"4","2":"S","3":"9.997162e+03"},{"1":"5","2":"S","3":"9.996424e+03"},{"1":"6","2":"S","3":"9.995521e+03"},{"1":"7","2":"S","3":"9.994420e+03"},{"1":"8","2":"S","3":"9.993075e+03"},{"1":"9","2":"S","3":"9.991433e+03"},{"1":"10","2":"S","3":"9.989428e+03"},{"1":"11","2":"S","3":"9.986980e+03"},{"1":"12","2":"S","3":"9.983993e+03"},{"1":"13","2":"S","3":"9.980347e+03"},{"1":"14","2":"S","3":"9.975899e+03"},{"1":"15","2":"S","3":"9.970472e+03"},{"1":"16","2":"S","3":"9.963854e+03"},{"1":"17","2":"S","3":"9.955785e+03"},{"1":"18","2":"S","3":"9.945951e+03"},{"1":"19","2":"S","3":"9.933973e+03"},{"1":"20","2":"S","3":"9.919392e+03"},{"1":"21","2":"S","3":"9.901655e+03"},{"1":"22","2":"S","3":"9.880097e+03"},{"1":"23","2":"S","3":"9.853926e+03"},{"1":"24","2":"S","3":"9.822194e+03"},{"1":"25","2":"S","3":"9.783781e+03"},{"1":"26","2":"S","3":"9.737371e+03"},{"1":"27","2":"S","3":"9.681427e+03"},{"1":"28","2":"S","3":"9.614181e+03"},{"1":"29","2":"S","3":"9.533619e+03"},{"1":"30","2":"S","3":"9.437491e+03"},{"1":"31","2":"S","3":"9.323336e+03"},{"1":"32","2":"S","3":"9.188536e+03"},{"1":"33","2":"S","3":"9.030414e+03"},{"1":"34","2":"S","3":"8.846371e+03"},{"1":"35","2":"S","3":"8.634075e+03"},{"1":"36","2":"S","3":"8.391706e+03"},{"1":"37","2":"S","3":"8.118221e+03"},{"1":"38","2":"S","3":"7.813638e+03"},{"1":"39","2":"S","3":"7.479283e+03"},{"1":"40","2":"S","3":"7.117950e+03"},{"1":"41","2":"S","3":"6.733922e+03"},{"1":"42","2":"S","3":"6.332834e+03"},{"1":"43","2":"S","3":"5.921346e+03"},{"1":"44","2":"S","3":"5.506682e+03"},{"1":"45","2":"S","3":"5.096091e+03"},{"1":"46","2":"S","3":"4.696321e+03"},{"1":"47","2":"S","3":"4.313178e+03"},{"1":"48","2":"S","3":"3.951241e+03"},{"1":"49","2":"S","3":"3.613729e+03"},{"1":"50","2":"S","3":"3.302537e+03"},{"1":"51","2":"S","3":"3.018376e+03"},{"1":"52","2":"S","3":"2.760982e+03"},{"1":"53","2":"S","3":"2.529355e+03"},{"1":"54","2":"S","3":"2.321990e+03"},{"1":"55","2":"S","3":"2.137069e+03"},{"1":"56","2":"S","3":"1.972626e+03"},{"1":"57","2":"S","3":"1.826670e+03"},{"1":"58","2":"S","3":"1.697262e+03"},{"1":"59","2":"S","3":"1.582576e+03"},{"1":"60","2":"S","3":"1.480927e+03"},{"1":"61","2":"S","3":"1.390785e+03"},{"1":"62","2":"S","3":"1.310779e+03"},{"1":"63","2":"S","3":"1.239689e+03"},{"1":"64","2":"S","3":"1.176440e+03"},{"1":"65","2":"S","3":"1.120086e+03"},{"1":"66","2":"S","3":"1.069798e+03"},{"1":"67","2":"S","3":"1.024853e+03"},{"1":"68","2":"S","3":"9.846191e+02"},{"1":"69","2":"S","3":"9.485452e+02"},{"1":"70","2":"S","3":"9.161505e+02"},{"1":"71","2":"S","3":"8.870151e+02"},{"1":"72","2":"S","3":"8.607722e+02"},{"1":"73","2":"S","3":"8.371009e+02"},{"1":"74","2":"S","3":"8.157198e+02"},{"1":"75","2":"S","3":"7.963823e+02"},{"1":"76","2":"S","3":"7.788713e+02"},{"1":"77","2":"S","3":"7.629956e+02"},{"1":"78","2":"S","3":"7.485866e+02"},{"1":"79","2":"S","3":"7.354951e+02"},{"1":"80","2":"S","3":"7.235891e+02"},{"1":"81","2":"S","3":"7.127511e+02"},{"1":"82","2":"S","3":"7.028770e+02"},{"1":"83","2":"S","3":"6.938738e+02"},{"1":"84","2":"S","3":"6.856584e+02"},{"1":"85","2":"S","3":"6.781568e+02"},{"1":"86","2":"S","3":"6.713024e+02"},{"1":"87","2":"S","3":"6.650357e+02"},{"1":"88","2":"S","3":"6.593029e+02"},{"1":"89","2":"S","3":"6.540560e+02"},{"1":"90","2":"S","3":"6.492513e+02"},{"1":"91","2":"S","3":"6.448496e+02"},{"1":"92","2":"S","3":"6.408155e+02"},{"1":"93","2":"S","3":"6.371168e+02"},{"1":"94","2":"S","3":"6.337244e+02"},{"1":"95","2":"S","3":"6.306119e+02"},{"1":"96","2":"S","3":"6.277554e+02"},{"1":"97","2":"S","3":"6.251330e+02"},{"1":"98","2":"S","3":"6.227250e+02"},{"1":"99","2":"S","3":"6.205132e+02"},{"1":"100","2":"S","3":"6.184813e+02"},{"1":"101","2":"S","3":"6.166142e+02"},{"1":"102","2":"S","3":"6.148983e+02"},{"1":"103","2":"S","3":"6.133209e+02"},{"1":"104","2":"S","3":"6.118707e+02"},{"1":"105","2":"S","3":"6.105373e+02"},{"1":"106","2":"S","3":"6.093110e+02"},{"1":"107","2":"S","3":"6.081832e+02"},{"1":"108","2":"S","3":"6.071457e+02"},{"1":"109","2":"S","3":"6.061912e+02"},{"1":"110","2":"S","3":"6.053131e+02"},{"1":"111","2":"S","3":"6.045051e+02"},{"1":"112","2":"S","3":"6.037616e+02"},{"1":"113","2":"S","3":"6.030773e+02"},{"1":"114","2":"S","3":"6.024475e+02"},{"1":"115","2":"S","3":"6.018679e+02"},{"1":"116","2":"S","3":"6.013343e+02"},{"1":"117","2":"S","3":"6.008432e+02"},{"1":"118","2":"S","3":"6.003910e+02"},{"1":"119","2":"S","3":"5.999748e+02"},{"1":"120","2":"S","3":"5.995916e+02"},{"1":"121","2":"S","3":"5.992388e+02"},{"1":"122","2":"S","3":"5.989139e+02"},{"1":"123","2":"S","3":"5.986148e+02"},{"1":"124","2":"S","3":"5.983394e+02"},{"1":"125","2":"S","3":"5.980857e+02"},{"1":"126","2":"S","3":"5.978522e+02"},{"1":"127","2":"S","3":"5.976371e+02"},{"1":"128","2":"S","3":"5.974391e+02"},{"1":"129","2":"S","3":"5.972567e+02"},{"1":"130","2":"S","3":"5.970887e+02"},{"1":"131","2":"S","3":"5.969341e+02"},{"1":"132","2":"S","3":"5.967916e+02"},{"1":"133","2":"S","3":"5.966604e+02"},{"1":"134","2":"S","3":"5.965396e+02"},{"1":"135","2":"S","3":"5.964283e+02"},{"1":"136","2":"S","3":"5.963258e+02"},{"1":"137","2":"S","3":"5.962314e+02"},{"1":"138","2":"S","3":"5.961444e+02"},{"1":"139","2":"S","3":"5.960644e+02"},{"1":"140","2":"S","3":"5.959906e+02"},{"1":"141","2":"S","3":"5.959227e+02"},{"1":"142","2":"S","3":"5.958601e+02"},{"1":"143","2":"S","3":"5.958025e+02"},{"1":"144","2":"S","3":"5.957494e+02"},{"1":"145","2":"S","3":"5.957005e+02"},{"1":"146","2":"S","3":"5.956555e+02"},{"1":"147","2":"S","3":"5.956140e+02"},{"1":"148","2":"S","3":"5.955758e+02"},{"1":"149","2":"S","3":"5.955406e+02"},{"1":"150","2":"S","3":"5.955082e+02"},{"1":"151","2":"S","3":"5.954783e+02"},{"1":"152","2":"S","3":"5.954508e+02"},{"1":"153","2":"S","3":"5.954255e+02"},{"1":"154","2":"S","3":"5.954021e+02"},{"1":"155","2":"S","3":"5.953806e+02"},{"1":"156","2":"S","3":"5.953608e+02"},{"1":"157","2":"S","3":"5.953426e+02"},{"1":"158","2":"S","3":"5.953258e+02"},{"1":"159","2":"S","3":"5.953103e+02"},{"1":"160","2":"S","3":"5.952961e+02"},{"1":"161","2":"S","3":"5.952830e+02"},{"1":"162","2":"S","3":"5.952709e+02"},{"1":"163","2":"S","3":"5.952597e+02"},{"1":"164","2":"S","3":"5.952495e+02"},{"1":"165","2":"S","3":"5.952400e+02"},{"1":"166","2":"S","3":"5.952313e+02"},{"1":"167","2":"S","3":"5.952233e+02"},{"1":"168","2":"S","3":"5.952159e+02"},{"1":"169","2":"S","3":"5.952091e+02"},{"1":"170","2":"S","3":"5.952028e+02"},{"1":"171","2":"S","3":"5.951971e+02"},{"1":"172","2":"S","3":"5.951917e+02"},{"1":"173","2":"S","3":"5.951869e+02"},{"1":"174","2":"S","3":"5.951823e+02"},{"1":"175","2":"S","3":"5.951782e+02"},{"1":"176","2":"S","3":"5.951744e+02"},{"1":"177","2":"S","3":"5.951708e+02"},{"1":"178","2":"S","3":"5.951676e+02"},{"1":"179","2":"S","3":"5.951646e+02"},{"1":"180","2":"S","3":"5.951618e+02"},{"1":"181","2":"S","3":"5.951593e+02"},{"1":"182","2":"S","3":"5.951570e+02"},{"1":"183","2":"S","3":"5.951548e+02"},{"1":"184","2":"S","3":"5.951528e+02"},{"1":"185","2":"S","3":"5.951510e+02"},{"1":"186","2":"S","3":"5.951493e+02"},{"1":"187","2":"S","3":"5.951478e+02"},{"1":"188","2":"S","3":"5.951463e+02"},{"1":"189","2":"S","3":"5.951450e+02"},{"1":"190","2":"S","3":"5.951438e+02"},{"1":"191","2":"S","3":"5.951427e+02"},{"1":"192","2":"S","3":"5.951417e+02"},{"1":"193","2":"S","3":"5.951407e+02"},{"1":"194","2":"S","3":"5.951398e+02"},{"1":"195","2":"S","3":"5.951390e+02"},{"1":"196","2":"S","3":"5.951383e+02"},{"1":"197","2":"S","3":"5.951376e+02"},{"1":"198","2":"S","3":"5.951370e+02"},{"1":"199","2":"S","3":"5.951364e+02"},{"1":"200","2":"S","3":"5.951359e+02"},{"1":"0","2":"I","3":"1.000000e+00"},{"1":"1","2":"I","3":"1.221361e+00"},{"1":"2","2":"I","3":"1.491706e+00"},{"1":"3","2":"I","3":"1.821866e+00"},{"1":"4","2":"I","3":"2.225064e+00"},{"1":"5","2":"I","3":"2.717441e+00"},{"1":"6","2":"I","3":"3.318689e+00"},{"1":"7","2":"I","3":"4.052848e+00"},{"1":"8","2":"I","3":"4.949236e+00"},{"1":"9","2":"I","3":"6.043612e+00"},{"1":"10","2":"I","3":"7.379574e+00"},{"1":"11","2":"I","3":"9.010253e+00"},{"1":"12","2":"I","3":"1.100037e+01"},{"1":"13","2":"I","3":"1.342873e+01"},{"1":"14","2":"I","3":"1.639116e+01"},{"1":"15","2":"I","3":"2.000417e+01"},{"1":"16","2":"I","3":"2.440917e+01"},{"1":"17","2":"I","3":"2.977763e+01"},{"1":"18","2":"I","3":"3.631709e+01"},{"1":"19","2":"I","3":"4.427823e+01"},{"1":"20","2":"I","3":"5.396311e+01"},{"1":"21","2":"I","3":"6.573458e+01"},{"1":"22","2":"I","3":"8.002682e+01"},{"1":"23","2":"I","3":"9.735701e+01"},{"1":"24","2":"I","3":"1.183376e+02"},{"1":"25","2":"I","3":"1.436887e+02"},{"1":"26","2":"I","3":"1.742495e+02"},{"1":"27","2":"I","3":"2.109869e+02"},{"1":"28","2":"I","3":"2.549993e+02"},{"1":"29","2":"I","3":"3.075118e+02"},{"1":"30","2":"I","3":"3.698590e+02"},{"1":"31","2":"I","3":"4.434488e+02"},{"1":"32","2":"I","3":"5.297024e+02"},{"1":"33","2":"I","3":"6.299630e+02"},{"1":"34","2":"I","3":"7.453700e+02"},{"1":"35","2":"I","3":"8.766964e+02"},{"1":"36","2":"I","3":"1.024157e+03"},{"1":"37","2":"I","3":"1.187199e+03"},{"1":"38","2":"I","3":"1.364314e+03"},{"1":"39","2":"I","3":"1.552890e+03"},{"1":"40","2":"I","3":"1.749167e+03"},{"1":"41","2":"I","3":"1.948321e+03"},{"1":"42","2":"I","3":"2.144709e+03"},{"1":"43","2":"I","3":"2.332250e+03"},{"1":"44","2":"I","3":"2.504908e+03"},{"1":"45","2":"I","3":"2.657204e+03"},{"1":"46","2":"I","3":"2.784658e+03"},{"1":"47","2":"I","3":"2.884119e+03"},{"1":"48","2":"I","3":"2.953906e+03"},{"1":"49","2":"I","3":"2.993786e+03"},{"1":"50","2":"I","3":"3.004815e+03"},{"1":"51","2":"I","3":"2.989070e+03"},{"1":"52","2":"I","3":"2.949356e+03"},{"1":"53","2":"I","3":"2.888910e+03"},{"1":"54","2":"I","3":"2.811143e+03"},{"1":"55","2":"I","3":"2.719433e+03"},{"1":"56","2":"I","3":"2.616978e+03"},{"1":"57","2":"I","3":"2.506696e+03"},{"1":"58","2":"I","3":"2.391177e+03"},{"1":"59","2":"I","3":"2.272654e+03"},{"1":"60","2":"I","3":"2.153018e+03"},{"1":"61","2":"I","3":"2.033827e+03"},{"1":"62","2":"I","3":"1.916343e+03"},{"1":"63","2":"I","3":"1.801563e+03"},{"1":"64","2":"I","3":"1.690253e+03"},{"1":"65","2":"I","3":"1.582982e+03"},{"1":"66","2":"I","3":"1.480151e+03"},{"1":"67","2":"I","3":"1.382027e+03"},{"1":"68","2":"I","3":"1.288763e+03"},{"1":"69","2":"I","3":"1.200418e+03"},{"1":"70","2":"I","3":"1.116984e+03"},{"1":"71","2":"I","3":"1.038390e+03"},{"1":"72","2":"I","3":"9.645263e+02"},{"1":"73","2":"I","3":"8.952465e+02"},{"1":"74","2":"I","3":"8.303821e+02"},{"1":"75","2":"I","3":"7.697476e+02"},{"1":"76","2":"I","3":"7.131467e+02"},{"1":"77","2":"I","3":"6.603773e+02"},{"1":"78","2":"I","3":"6.112351e+02"},{"1":"79","2":"I","3":"5.655166e+02"},{"1":"80","2":"I","3":"5.230218e+02"},{"1":"81","2":"I","3":"4.835553e+02"},{"1":"82","2":"I","3":"4.469282e+02"},{"1":"83","2":"I","3":"4.129585e+02"},{"1":"84","2":"I","3":"3.814723e+02"},{"1":"85","2":"I","3":"3.523037e+02"},{"1":"86","2":"I","3":"3.252955e+02"},{"1":"87","2":"I","3":"3.002987e+02"},{"1":"88","2":"I","3":"2.771729e+02"},{"1":"89","2":"I","3":"2.557859e+02"},{"1":"90","2":"I","3":"2.360136e+02"},{"1":"91","2":"I","3":"2.177396e+02"},{"1":"92","2":"I","3":"2.008551e+02"},{"1":"93","2":"I","3":"1.852585e+02"},{"1":"94","2":"I","3":"1.708548e+02"},{"1":"95","2":"I","3":"1.575556e+02"},{"1":"96","2":"I","3":"1.452786e+02"},{"1":"97","2":"I","3":"1.339472e+02"},{"1":"98","2":"I","3":"1.234904e+02"},{"1":"99","2":"I","3":"1.138420e+02"},{"1":"100","2":"I","3":"1.049408e+02"},{"1":"101","2":"I","3":"9.672985e+01"},{"1":"102","2":"I","3":"8.915660e+01"},{"1":"103","2":"I","3":"8.217222e+01"},{"1":"104","2":"I","3":"7.573155e+01"},{"1":"105","2":"I","3":"6.979279e+01"},{"1":"106","2":"I","3":"6.431727e+01"},{"1":"107","2":"I","3":"5.926924e+01"},{"1":"108","2":"I","3":"5.461563e+01"},{"1":"109","2":"I","3":"5.032590e+01"},{"1":"110","2":"I","3":"4.637184e+01"},{"1":"111","2":"I","3":"4.272736e+01"},{"1":"112","2":"I","3":"3.936839e+01"},{"1":"113","2":"I","3":"3.627271e+01"},{"1":"114","2":"I","3":"3.341980e+01"},{"1":"115","2":"I","3":"3.079071e+01"},{"1":"116","2":"I","3":"2.836798e+01"},{"1":"117","2":"I","3":"2.613547e+01"},{"1":"118","2":"I","3":"2.407832e+01"},{"1":"119","2":"I","3":"2.218280e+01"},{"1":"120","2":"I","3":"2.043626e+01"},{"1":"121","2":"I","3":"1.882702e+01"},{"1":"122","2":"I","3":"1.734433e+01"},{"1":"123","2":"I","3":"1.597825e+01"},{"1":"124","2":"I","3":"1.471964e+01"},{"1":"125","2":"I","3":"1.356006e+01"},{"1":"126","2":"I","3":"1.249174e+01"},{"1":"127","2":"I","3":"1.150751e+01"},{"1":"128","2":"I","3":"1.060077e+01"},{"1":"129","2":"I","3":"9.765411e+00"},{"1":"130","2":"I","3":"8.995836e+00"},{"1":"131","2":"I","3":"8.286868e+00"},{"1":"132","2":"I","3":"7.633741e+00"},{"1":"133","2":"I","3":"7.032060e+00"},{"1":"134","2":"I","3":"6.477779e+00"},{"1":"135","2":"I","3":"5.967167e+00"},{"1":"136","2":"I","3":"5.496786e+00"},{"1":"137","2":"I","3":"5.063469e+00"},{"1":"138","2":"I","3":"4.664298e+00"},{"1":"139","2":"I","3":"4.296585e+00"},{"1":"140","2":"I","3":"3.957852e+00"},{"1":"141","2":"I","3":"3.645815e+00"},{"1":"142","2":"I","3":"3.358374e+00"},{"1":"143","2":"I","3":"3.093588e+00"},{"1":"144","2":"I","3":"2.849675e+00"},{"1":"145","2":"I","3":"2.624989e+00"},{"1":"146","2":"I","3":"2.418015e+00"},{"1":"147","2":"I","3":"2.227358e+00"},{"1":"148","2":"I","3":"2.051731e+00"},{"1":"149","2":"I","3":"1.889951e+00"},{"1":"150","2":"I","3":"1.740925e+00"},{"1":"151","2":"I","3":"1.603648e+00"},{"1":"152","2":"I","3":"1.477195e+00"},{"1":"153","2":"I","3":"1.360712e+00"},{"1":"154","2":"I","3":"1.253414e+00"},{"1":"155","2":"I","3":"1.154575e+00"},{"1":"156","2":"I","3":"1.063530e+00"},{"1":"157","2":"I","3":"9.796637e-01"},{"1":"158","2":"I","3":"9.024104e-01"},{"1":"159","2":"I","3":"8.312486e-01"},{"1":"160","2":"I","3":"7.656981e-01"},{"1":"161","2":"I","3":"7.053165e-01"},{"1":"162","2":"I","3":"6.496963e-01"},{"1":"163","2":"I","3":"5.984619e-01"},{"1":"164","2":"I","3":"5.512677e-01"},{"1":"165","2":"I","3":"5.077950e-01"},{"1":"166","2":"I","3":"4.677505e-01"},{"1":"167","2":"I","3":"4.308637e-01"},{"1":"168","2":"I","3":"3.968857e-01"},{"1":"169","2":"I","3":"3.655872e-01"},{"1":"170","2":"I","3":"3.367568e-01"},{"1":"171","2":"I","3":"3.101999e-01"},{"1":"172","2":"I","3":"2.857373e-01"},{"1":"173","2":"I","3":"2.632037e-01"},{"1":"174","2":"I","3":"2.424472e-01"},{"1":"175","2":"I","3":"2.233275e-01"},{"1":"176","2":"I","3":"2.057156e-01"},{"1":"177","2":"I","3":"1.894926e-01"},{"1":"178","2":"I","3":"1.745489e-01"},{"1":"179","2":"I","3":"1.607837e-01"},{"1":"180","2":"I","3":"1.481040e-01"},{"1":"181","2":"I","3":"1.364243e-01"},{"1":"182","2":"I","3":"1.256656e-01"},{"1":"183","2":"I","3":"1.157554e-01"},{"1":"184","2":"I","3":"1.066267e-01"},{"1":"185","2":"I","3":"9.821787e-02"},{"1":"186","2":"I","3":"9.047221e-02"},{"1":"187","2":"I","3":"8.333738e-02"},{"1":"188","2":"I","3":"7.676521e-02"},{"1":"189","2":"I","3":"7.071134e-02"},{"1":"190","2":"I","3":"6.513488e-02"},{"1":"191","2":"I","3":"5.999820e-02"},{"1":"192","2":"I","3":"5.526660e-02"},{"1":"193","2":"I","3":"5.090815e-02"},{"1":"194","2":"I","3":"4.689342e-02"},{"1":"195","2":"I","3":"4.319529e-02"},{"1":"196","2":"I","3":"3.978881e-02"},{"1":"197","2":"I","3":"3.665096e-02"},{"1":"198","2":"I","3":"3.376058e-02"},{"1":"199","2":"I","3":"3.109814e-02"},{"1":"200","2":"I","3":"2.864566e-02"},{"1":"0","2":"R","3":"0.000000e+00"},{"1":"1","2":"R","3":"1.106997e-01"},{"1":"2","2":"R","3":"2.459037e-01"},{"1":"3","2":"R","3":"4.110326e-01"},{"1":"4","2":"R","3":"6.127086e-01"},{"1":"5","2":"R","3":"8.590153e-01"},{"1":"6","2":"R","3":"1.159821e+00"},{"1":"7","2":"R","3":"1.527178e+00"},{"1":"8","2":"R","3":"1.975792e+00"},{"1":"9","2":"R","3":"2.523617e+00"},{"1":"10","2":"R","3":"3.192559e+00"},{"1":"11","2":"R","3":"4.009343e+00"},{"1":"12","2":"R","3":"5.006575e+00"},{"1":"13","2":"R","3":"6.224008e+00"},{"1":"14","2":"R","3":"7.710101e+00"},{"1":"15","2":"R","3":"9.523900e+00"},{"1":"16","2":"R","3":"1.173730e+01"},{"1":"17","2":"R","3":"1.443781e+01"},{"1":"18","2":"R","3":"1.773182e+01"},{"1":"19","2":"R","3":"2.174856e+01"},{"1":"20","2":"R","3":"2.664486e+01"},{"1":"21","2":"R","3":"3.261066e+01"},{"1":"22","2":"R","3":"3.987571e+01"},{"1":"23","2":"R","3":"4.871719e+01"},{"1":"24","2":"R","3":"5.946867e+01"},{"1":"25","2":"R","3":"7.253027e+01"},{"1":"26","2":"R","3":"8.837994e+01"},{"1":"27","2":"R","3":"1.075859e+02"},{"1":"28","2":"R","3":"1.308197e+02"},{"1":"29","2":"R","3":"1.588690e+02"},{"1":"30","2":"R","3":"1.926497e+02"},{"1":"31","2":"R","3":"2.332155e+02"},{"1":"32","2":"R","3":"2.817617e+02"},{"1":"33","2":"R","3":"3.396230e+02"},{"1":"34","2":"R","3":"4.082595e+02"},{"1":"35","2":"R","3":"4.892282e+02"},{"1":"36","2":"R","3":"5.841373e+02"},{"1":"37","2":"R","3":"6.945799e+02"},{"1":"38","2":"R","3":"8.220475e+02"},{"1":"39","2":"R","3":"9.678262e+02"},{"1":"40","2":"R","3":"1.132884e+03"},{"1":"41","2":"R","3":"1.317757e+03"},{"1":"42","2":"R","3":"1.522457e+03"},{"1":"43","2":"R","3":"1.746404e+03"},{"1":"44","2":"R","3":"1.988410e+03"},{"1":"45","2":"R","3":"2.246706e+03"},{"1":"46","2":"R","3":"2.519021e+03"},{"1":"47","2":"R","3":"2.802702e+03"},{"1":"48","2":"R","3":"3.094854e+03"},{"1":"49","2":"R","3":"3.392485e+03"},{"1":"50","2":"R","3":"3.692648e+03"},{"1":"51","2":"R","3":"3.992554e+03"},{"1":"52","2":"R","3":"4.289662e+03"},{"1":"53","2":"R","3":"4.581734e+03"},{"1":"54","2":"R","3":"4.866867e+03"},{"1":"55","2":"R","3":"5.143498e+03"},{"1":"56","2":"R","3":"5.410396e+03"},{"1":"57","2":"R","3":"5.666634e+03"},{"1":"58","2":"R","3":"5.911561e+03"},{"1":"59","2":"R","3":"6.144769e+03"},{"1":"60","2":"R","3":"6.366055e+03"},{"1":"61","2":"R","3":"6.575388e+03"},{"1":"62","2":"R","3":"6.772878e+03"},{"1":"63","2":"R","3":"6.958747e+03"},{"1":"64","2":"R","3":"7.133306e+03"},{"1":"65","2":"R","3":"7.296933e+03"},{"1":"66","2":"R","3":"7.450051e+03"},{"1":"67","2":"R","3":"7.593120e+03"},{"1":"68","2":"R","3":"7.726618e+03"},{"1":"69","2":"R","3":"7.851036e+03"},{"1":"70","2":"R","3":"7.966866e+03"},{"1":"71","2":"R","3":"8.074595e+03"},{"1":"72","2":"R","3":"8.174702e+03"},{"1":"73","2":"R","3":"8.267653e+03"},{"1":"74","2":"R","3":"8.353898e+03"},{"1":"75","2":"R","3":"8.433870e+03"},{"1":"76","2":"R","3":"8.507982e+03"},{"1":"77","2":"R","3":"8.576627e+03"},{"1":"78","2":"R","3":"8.640178e+03"},{"1":"79","2":"R","3":"8.698988e+03"},{"1":"80","2":"R","3":"8.753389e+03"},{"1":"81","2":"R","3":"8.803694e+03"},{"1":"82","2":"R","3":"8.850195e+03"},{"1":"83","2":"R","3":"8.893168e+03"},{"1":"84","2":"R","3":"8.932869e+03"},{"1":"85","2":"R","3":"8.969539e+03"},{"1":"86","2":"R","3":"9.003402e+03"},{"1":"87","2":"R","3":"9.034666e+03"},{"1":"88","2":"R","3":"9.063524e+03"},{"1":"89","2":"R","3":"9.090158e+03"},{"1":"90","2":"R","3":"9.114735e+03"},{"1":"91","2":"R","3":"9.137411e+03"},{"1":"92","2":"R","3":"9.158329e+03"},{"1":"93","2":"R","3":"9.177625e+03"},{"1":"94","2":"R","3":"9.195421e+03"},{"1":"95","2":"R","3":"9.211832e+03"},{"1":"96","2":"R","3":"9.226966e+03"},{"1":"97","2":"R","3":"9.240920e+03"},{"1":"98","2":"R","3":"9.253785e+03"},{"1":"99","2":"R","3":"9.265645e+03"},{"1":"100","2":"R","3":"9.276578e+03"},{"1":"101","2":"R","3":"9.286656e+03"},{"1":"102","2":"R","3":"9.295945e+03"},{"1":"103","2":"R","3":"9.304507e+03"},{"1":"104","2":"R","3":"9.312398e+03"},{"1":"105","2":"R","3":"9.319670e+03"},{"1":"106","2":"R","3":"9.326372e+03"},{"1":"107","2":"R","3":"9.332548e+03"},{"1":"108","2":"R","3":"9.338239e+03"},{"1":"109","2":"R","3":"9.343483e+03"},{"1":"110","2":"R","3":"9.348315e+03"},{"1":"111","2":"R","3":"9.352768e+03"},{"1":"112","2":"R","3":"9.356870e+03"},{"1":"113","2":"R","3":"9.360650e+03"},{"1":"114","2":"R","3":"9.364133e+03"},{"1":"115","2":"R","3":"9.367341e+03"},{"1":"116","2":"R","3":"9.370298e+03"},{"1":"117","2":"R","3":"9.373021e+03"},{"1":"118","2":"R","3":"9.375531e+03"},{"1":"119","2":"R","3":"9.377842e+03"},{"1":"120","2":"R","3":"9.379972e+03"},{"1":"121","2":"R","3":"9.381934e+03"},{"1":"122","2":"R","3":"9.383742e+03"},{"1":"123","2":"R","3":"9.385407e+03"},{"1":"124","2":"R","3":"9.386941e+03"},{"1":"125","2":"R","3":"9.388354e+03"},{"1":"126","2":"R","3":"9.389656e+03"},{"1":"127","2":"R","3":"9.390855e+03"},{"1":"128","2":"R","3":"9.391960e+03"},{"1":"129","2":"R","3":"9.392978e+03"},{"1":"130","2":"R","3":"9.393915e+03"},{"1":"131","2":"R","3":"9.394779e+03"},{"1":"132","2":"R","3":"9.395575e+03"},{"1":"133","2":"R","3":"9.396308e+03"},{"1":"134","2":"R","3":"9.396983e+03"},{"1":"135","2":"R","3":"9.397605e+03"},{"1":"136","2":"R","3":"9.398177e+03"},{"1":"137","2":"R","3":"9.398705e+03"},{"1":"138","2":"R","3":"9.399191e+03"},{"1":"139","2":"R","3":"9.399639e+03"},{"1":"140","2":"R","3":"9.400052e+03"},{"1":"141","2":"R","3":"9.400432e+03"},{"1":"142","2":"R","3":"9.400782e+03"},{"1":"143","2":"R","3":"9.401104e+03"},{"1":"144","2":"R","3":"9.401401e+03"},{"1":"145","2":"R","3":"9.401675e+03"},{"1":"146","2":"R","3":"9.401927e+03"},{"1":"147","2":"R","3":"9.402159e+03"},{"1":"148","2":"R","3":"9.402372e+03"},{"1":"149","2":"R","3":"9.402569e+03"},{"1":"150","2":"R","3":"9.402751e+03"},{"1":"151","2":"R","3":"9.402918e+03"},{"1":"152","2":"R","3":"9.403072e+03"},{"1":"153","2":"R","3":"9.403214e+03"},{"1":"154","2":"R","3":"9.403344e+03"},{"1":"155","2":"R","3":"9.403465e+03"},{"1":"156","2":"R","3":"9.403576e+03"},{"1":"157","2":"R","3":"9.403678e+03"},{"1":"158","2":"R","3":"9.403772e+03"},{"1":"159","2":"R","3":"9.403858e+03"},{"1":"160","2":"R","3":"9.403938e+03"},{"1":"161","2":"R","3":"9.404012e+03"},{"1":"162","2":"R","3":"9.404079e+03"},{"1":"163","2":"R","3":"9.404142e+03"},{"1":"164","2":"R","3":"9.404199e+03"},{"1":"165","2":"R","3":"9.404252e+03"},{"1":"166","2":"R","3":"9.404301e+03"},{"1":"167","2":"R","3":"9.404346e+03"},{"1":"168","2":"R","3":"9.404387e+03"},{"1":"169","2":"R","3":"9.404425e+03"},{"1":"170","2":"R","3":"9.404460e+03"},{"1":"171","2":"R","3":"9.404493e+03"},{"1":"172","2":"R","3":"9.404523e+03"},{"1":"173","2":"R","3":"9.404550e+03"},{"1":"174","2":"R","3":"9.404575e+03"},{"1":"175","2":"R","3":"9.404598e+03"},{"1":"176","2":"R","3":"9.404620e+03"},{"1":"177","2":"R","3":"9.404640e+03"},{"1":"178","2":"R","3":"9.404658e+03"},{"1":"179","2":"R","3":"9.404675e+03"},{"1":"180","2":"R","3":"9.404690e+03"},{"1":"181","2":"R","3":"9.404704e+03"},{"1":"182","2":"R","3":"9.404717e+03"},{"1":"183","2":"R","3":"9.404729e+03"},{"1":"184","2":"R","3":"9.404741e+03"},{"1":"185","2":"R","3":"9.404751e+03"},{"1":"186","2":"R","3":"9.404760e+03"},{"1":"187","2":"R","3":"9.404769e+03"},{"1":"188","2":"R","3":"9.404777e+03"},{"1":"189","2":"R","3":"9.404784e+03"},{"1":"190","2":"R","3":"9.404791e+03"},{"1":"191","2":"R","3":"9.404797e+03"},{"1":"192","2":"R","3":"9.404803e+03"},{"1":"193","2":"R","3":"9.404808e+03"},{"1":"194","2":"R","3":"9.404813e+03"},{"1":"195","2":"R","3":"9.404818e+03"},{"1":"196","2":"R","3":"9.404822e+03"},{"1":"197","2":"R","3":"9.404826e+03"},{"1":"198","2":"R","3":"9.404829e+03"},{"1":"199","2":"R","3":"9.404833e+03"},{"1":"200","2":"R","3":"9.404835e+03"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+  </script>
+</div>
+</div>
+</div>
+<p>It took our data with seperate columns for the <em>S</em>, <em>I</em>, and <em>R</em> compartments, and created a new dataframe with the new Compartment and Count columns. Instead of having a <em>wide</em> dataframe, we have a <em>long (</em>andtidy<em>)</em> one.</p>
+</section>
+<section id="step-2-plot-it" class="level4">
+<h4 class="anchored" data-anchor-id="step-2-plot-it">Step 2: Plot it!</h4>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(time, Count, <span class="at">data=</span>output_gathered, <span class="at">color=</span>Compartment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+<section id="extending-the-sir-model" class="level2">
+<h2 class="anchored" data-anchor-id="extending-the-sir-model">Extending the SIR Model</h2>
+<p>We’ve seen many different versions of these contagion models now. Let’s see how we might go about building a slightly more complex version!</p>
+<p>I copied and pasted all the code we walked through above into one block now. But I’m also going to start modifying the model to include a transition from the <strong>Recovered</strong> compartment back into the <strong>Susceptible</strong> one. So, we’ll be looking at an <strong>SIRS</strong> model now!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>popSize <span class="ot">&lt;-</span> <span class="dv">10000</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>params  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">beta=</span><span class="fl">0.3</span><span class="sc">/</span>popSize, <span class="at">gamma=</span><span class="fl">0.1</span>, <span class="at">zeta=</span><span class="fl">0.03</span>)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>state   <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="at">S=</span><span class="dv">10000-1</span>, <span class="at">I=</span><span class="dv">1</span>, <span class="at">R=</span><span class="dv">0</span>)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>SIRModel <span class="ot">&lt;-</span> <span class="cf">function</span>(t, state, params) {</span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">with</span>(<span class="fu">as.list</span>(<span class="fu">c</span>(params, state)), {</span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    dS <span class="ot">=</span> <span class="sc">-</span>beta<span class="sc">*</span>S<span class="sc">*</span>I <span class="sc">+</span> zeta<span class="sc">*</span>R</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>    dI <span class="ot">=</span> beta<span class="sc">*</span>S<span class="sc">*</span>I<span class="sc">-</span>gamma<span class="sc">*</span>I</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    dR <span class="ot">=</span> gamma <span class="sc">*</span> I <span class="sc">-</span> zeta<span class="sc">*</span>R</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    eqns <span class="ot">=</span> <span class="fu">c</span>(dS, dI, dR)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">list</span>(eqns))</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  })</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">0</span>, <span class="dv">200</span>, <span class="dv">1</span>)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>model_output <span class="ot">&lt;-</span> <span class="fu">ode</span>(<span class="at">y =</span> state, <span class="at">times =</span> times, <span class="at">func =</span> SIRModel, <span class="at">parms =</span> params)</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>output_gathered <span class="ot">&lt;-</span> <span class="fu">gather</span>(<span class="fu">as.data.frame</span>(model_output), Compartment, Count, <span class="sc">-</span>time)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="fu">qplot</span>(time, Count, <span class="at">data=</span>output_gathered, <span class="at">color=</span>Compartment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="index_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
