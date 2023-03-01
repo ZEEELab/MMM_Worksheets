@@ -36,6 +36,18 @@ function SIRPlot({odex_solver, days}) {
     }
 
     let layout = {
+        margin: {
+            l: 50,
+            r: 10,
+            b: 50,
+            t: 10,
+            pad: 10
+          },
+        legend: {
+            x:1,
+            xanchor: 'right',
+            y:1
+        }, 
         xaxis: {
             title: {
                 text: 'Time (Days)',

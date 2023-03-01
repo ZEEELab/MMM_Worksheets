@@ -48,7 +48,7 @@ function App() {
           onChange={handleBetaChange}
           step={0.0001}
           min={0.0001}
-          max={0.01}
+          max={0.05}
           valueLabelDisplay="auto"
         />
         <Typography gutterBottom>
@@ -61,7 +61,7 @@ function App() {
           onChange={handleGammaChange}
           step={0.0001}
           min={0.0001}
-          max={0.1}
+          max={0.5}
           valueLabelDisplay="auto"
         />
         <Typography gutterBottom>
